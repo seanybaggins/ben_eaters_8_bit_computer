@@ -1,0 +1,13 @@
+.library_mapping.xml
+.project
+vunit_out
+output_files
+incremental_db
+db
+.settings
+hardware_dependencies_assignment_defaults.qdf
+hardware_dependencies.htm
+hardware_dependencies.qpf
+hardware_dependencies.qsf
+hardware_dependencies.qws
+hardware_dependencies.sdc
