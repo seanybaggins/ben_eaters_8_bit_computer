@@ -29,22 +29,24 @@ BEGIN
     test_runner_setup(runner, runner_cfg);
 
     WHILE test_suite LOOP
-      --IF run("correct begining state") THEN
-        ---wait for 20 ns;
-        ---check(output = input_1, "Incorrect intial state");
-
-      IF run("button press to switch inputs") THEN
+      IF run("correct_begining_state") THEN
+        WAIT FOR 20 ns;
+        check(output = input_1, "Incorrect intial state");
+        
+      ELSIF run("button_press_to_switch_inputs") THEN
         button <= '0';
         check(output = input_1);
-        wait for 20 ns;
+        WAIT FOR 20 ns;
         button <= '1';
-        wait for 20 ns;
+        WAIT FOR 20 ns;
         check(output = input_2, "Input did not change when button was pressed");
+        wait;
+        
       END IF;
-      
+
     END LOOP;
 
-    test_runner_cleanup(runner); -- Simulation ends here
+    test_runner_cleanup(runner); 
     WAIT;
   END PROCESS;
 END ARCHITECTURE;
