@@ -5,24 +5,69 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
 LIBRARY src;
-USE src.mux_2i_1o;
+USE src.variable_clock;
 
 ENTITY tb_variable_clock IS
     GENERIC (runner_cfg : STRING);
 END ENTITY;
 
-architecture tb of tb_variable_clock is 
-    signal is_fast : in std_logic := '1';
-    signal variable_clock_output out : std_logic;
+ARCHITECTURE tb OF tb_variable_clock IS
+    SIGNAL is_fast : std_logic := '1';
+    SIGNAL variable_clock_output : std_logic;
 
     -- test bench internal signals
-    CONSTANT clk_period : TIME := 20 ns;
+    Constant test_clock_frequency : Integer := 50_000_000;
+    CONSTANT CLK_PERIOD : TIME := 20 ns;
     SIGNAL start : BOOLEAN := true; -- To indicate the test is done
-    SIGNAL test_clk : in std_logic := '0';
-begin
-    variable_clock : ENTITY variable_clock port map (
-        test_clk => clk_50_Mhz,
+    SIGNAL test_clk : std_logic := '0';
+    SIGNAL test_clk_counter : INTEGER := 0;
+    SIGNAL clk_output_counter : INTEGER := 0;
+BEGIN
+    variable_clock_instance : ENTITY variable_clock PORT MAP (
+        clk_50_Mhz => test_clk,
         is_fast => is_fast,
-        variable_clock_output => clk
-    )
-end architecture
+        clk => variable_clock_output
+        );
+
+    test_clk <= NOT test_clk AFTER CLK_PERIOD / 2;
+
+    increment_test_clk_counter : PROCESS (test_clk)
+    BEGIN
+        if rising_edge(test_clk) then
+            test_clk_counter <= test_clk_counter + 1;
+        end if;
+    END PROCESS;
+
+    increment_clk_output_counter : PROCESS (variable_clock_output)
+    BEGIN
+        IF rising_edge(variable_clock_output) THEN
+            clk_output_counter <= clk_output_counter + 1;
+        END IF;
+    END PROCESS;
+
+    main : PROCESS
+
+        PROCEDURE run_test IS BEGIN
+            info("Init test");
+            WAIT UNTIL rising_edge(test_clk);
+            start <= true;
+            WAIT UNTIL rising_edge(test_clk);
+            start <= false;
+            WAIT UNTIL (rising_edge(test_clk));
+            info("Test done");
+        END PROCEDURE;
+
+    BEGIN
+        test_runner_setup(runner, runner_cfg);
+
+        WHILE test_suite LOOP
+            IF run("varible clk fast output") THEN
+                WAIT for 51 ms;
+                check(clk_output_counter = 1, "Incorrect number of cycles for varible clk fast output");
+                run_test;
+            END IF;
+        END LOOP;
+        test_runner_cleanup(runner);
+        WAIT;
+    END PROCESS;
+END ARCHITECTURE;
