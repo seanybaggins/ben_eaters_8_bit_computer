@@ -12,7 +12,7 @@ ENTITY tb_variable_clock IS
 END ENTITY;
 
 ARCHITECTURE tb OF tb_variable_clock IS
-    SIGNAL is_fast : std_logic := '1';
+    SIGNAL is_fast : std_logic;
     SIGNAL variable_clock_output : std_logic;
 
     -- test bench internal signals
@@ -62,8 +62,15 @@ BEGIN
 
         WHILE test_suite LOOP
             IF run("varible clk fast output") THEN
-                WAIT for 51 ms;
+                is_fast <= '1';
+                WAIT for 50 ms; -- 1/20 sec
                 check(clk_output_counter = 1, "Incorrect number of cycles for varible clk fast output");
+                run_test;
+
+            elsif run("variable clk slow output") then
+                is_fast <= '0';
+                wait for 1000 ms;
+                check(clk_output_counter = 1, "Incorrect number of cycles for varialbe clk slow output");
                 run_test;
             END IF;
         END LOOP;

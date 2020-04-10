@@ -6,7 +6,7 @@ ENTITY variable_clock IS
     PORT (
         clk_50_MHz : IN std_logic;
         is_fast : IN std_logic;
-        clk : OUT std_logic := '0'
+        clk : OUT std_logic := '1' -- Will imediately be flipped first iteration of the set_output process
     );
 END variable_clock;
 
@@ -18,7 +18,9 @@ ARCHITECTURE RTL OF variable_clock IS
 BEGIN
     increment_counter : PROCESS (clk_50_MHz)
     BEGIN
-        counter <= counter + 1;
+        IF rising_edge(clk_50_MHz) THEN
+            counter <= counter + 1;
+        END IF;
     END PROCESS;
 
     set_output : PROCESS (clk_50_MHz)
@@ -26,14 +28,12 @@ BEGIN
         IF rising_edge(clk_50_MHz) THEN
             CASE is_fast IS
                 WHEN '1' =>
-                    -- x by 2 for a 50 % duty cycle
-                    clk <= '0' WHEN ((counter MOD FAST_MAX_CYCLE_COUNT) < FAST_MAX_CYCLE_COUNT)
-                        ELSE
-                        '1';
+                    -- dividing by 2 for 20 % duty cycle
+                    clk <= NOT clk WHEN ((counter MOD (FAST_MAX_CYCLE_COUNT / 2)) = 0);
+
                 WHEN OTHERS =>
-                    clk <= '0' WHEN ((counter MOD SLOW_MAX_CYCLE_COUNT) < SLOW_MAX_CYCLE_COUNT/2)
-                        ELSE
-                        '1';
+                    -- dividing by 2 for 20 % duty cycle
+                    clk <= NOT clk WHEN ((counter MOD (SLOW_MAX_CYCLE_COUNT / 2)) = 0);
             END CASE;
         END IF;
     END PROCESS;
