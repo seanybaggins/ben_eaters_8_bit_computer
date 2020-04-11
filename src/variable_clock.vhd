@@ -14,7 +14,8 @@ ARCHITECTURE RTL OF variable_clock IS
     CONSTANT FAST_MAX_CYCLE_COUNT : INTEGER := 2_500_000;
     CONSTANT SLOW_MAX_CYCLE_COUNT : INTEGER := 50_000_000;
     SIGNAL counter : INTEGER := 0;
-
+    signal should_transition_low : Boolean;
+    signal should_transition_heigh : Boolean;
 BEGIN
     increment_counter : PROCESS (clk_50_MHz)
     BEGIN
@@ -23,7 +24,26 @@ BEGIN
         END IF;
     END PROCESS;
 
-    clk <= not clk when (((counter MOD (FAST_MAX_CYCLE_COUNT / 2)) = 0) and is_fast = '1')
-        else not clk when (((counter MOD (SLOW_MAX_CYCLE_COUNT / 2)) = 0) and is_fast = '0');
+    should_transition_low <= 
+        (((counter MOD (FAST_MAX_CYCLE_COUNT / 2)) = 0) 
+        and is_fast = '1' 
+        and clk = '1')
+            or
+        (((counter MOD (SLOW_MAX_CYCLE_COUNT / 2)) = 0) 
+        and is_fast = '0' 
+        and clk = '1');
+
+    should_transition_heigh <= 
+        (((counter MOD (FAST_MAX_CYCLE_COUNT / 2)) = 0) 
+        and is_fast = '1' 
+        and clk = '0')
+            or
+        (((counter MOD (SLOW_MAX_CYCLE_COUNT / 2)) = 0) 
+        and is_fast = '0' 
+        and clk = '0');
+
+    clk <= 
+        '0' when (should_transition_low) else
+        '1' when (should_transition_heigh);
 
 END RTL;
