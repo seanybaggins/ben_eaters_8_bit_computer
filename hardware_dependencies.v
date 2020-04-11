@@ -53,14 +53,14 @@ module hardware_dependencies(
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================
-
-
+wire clock_led;
+assign clock_led = LEDR[0];
 
 
 //=======================================================
 //  Structural coding
 //=======================================================
-assign LEDR[0] = 0;
-
+//variable_clock variable_clock_instance(.clk_50_MHz(MAX10_CLK1_50), .is_fast(SW[0]), .clk(clock_led));
+assign LEDR[9] = MAX10_CLK1_50;
 
 endmodule
