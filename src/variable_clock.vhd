@@ -29,11 +29,14 @@ BEGIN
             CASE is_fast IS
                 WHEN '1' =>
                     -- dividing by 2 for 20 % duty cycle
-                    clk <= NOT clk WHEN ((counter MOD (FAST_MAX_CYCLE_COUNT / 2)) = 0);
-
+                    if (counter MOD (FAST_MAX_CYCLE_COUNT / 2)) = 0 then
+                        clk <= NOT clk;
+                    end if;
                 WHEN OTHERS =>
                     -- dividing by 2 for 20 % duty cycle
-                    clk <= NOT clk WHEN ((counter MOD (SLOW_MAX_CYCLE_COUNT / 2)) = 0);
+                    if (counter MOD (SLOW_MAX_CYCLE_COUNT / 2)) = 0 then
+                        clk <= NOT clk;
+                    end if;
             END CASE;
         END IF;
     END PROCESS;
