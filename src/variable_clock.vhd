@@ -23,21 +23,7 @@ BEGIN
         END IF;
     END PROCESS;
 
-    set_output : PROCESS (clk_50_MHz)
-    BEGIN
-        IF rising_edge(clk_50_MHz) THEN
-            CASE is_fast IS
-                WHEN '1' =>
-                    -- dividing by 2 for 20 % duty cycle
-                    if (counter MOD (FAST_MAX_CYCLE_COUNT / 2)) = 0 then
-                        clk <= NOT clk;
-                    end if;
-                WHEN OTHERS =>
-                    -- dividing by 2 for 20 % duty cycle
-                    if (counter MOD (SLOW_MAX_CYCLE_COUNT / 2)) = 0 then
-                        clk <= NOT clk;
-                    end if;
-            END CASE;
-        END IF;
-    END PROCESS;
+    clk <= not clk when (((counter MOD (FAST_MAX_CYCLE_COUNT / 2)) = 0) and is_fast = '1')
+        else not clk when (((counter MOD (SLOW_MAX_CYCLE_COUNT / 2)) = 0) and is_fast = '0');
+
 END RTL;

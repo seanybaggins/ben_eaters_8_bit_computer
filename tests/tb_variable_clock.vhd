@@ -61,13 +61,13 @@ BEGIN
         test_runner_setup(runner, runner_cfg);
 
         WHILE test_suite LOOP
-            IF run("varible clk fast output") THEN
+            IF run("varible_clk_fast_output") THEN
                 is_fast <= '1';
                 WAIT for 50 ms; -- 1/20 sec
                 check(clk_output_counter = 1, "Incorrect number of cycles for varible clk fast output");
                 run_test;
 
-            elsif run("variable clk slow output") then
+            elsif run("variable_clk_slow_output") then
                 is_fast <= '0';
                 wait for 1000 ms;
                 check(clk_output_counter = 1, "Incorrect number of cycles for varialbe clk slow output");
